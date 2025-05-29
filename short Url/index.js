@@ -1,9 +1,15 @@
 const express = require('express');
+const { connectMongoDb } = require("./connect")
 const path = require('path');
+const cookieParser = require("cookie-parser");
+const { restrictToLoggedinUserOnly, cheackAuth }= require ("./middleware/auth")
+
+const URL = require("./models/url")
+
 const urlRoutes = require("./routes/url")
 const stacticRoute = require("./routes/staticRouter")
-const URL = require("./models/url")
-const { connectMongoDb } = require("./connect")
+const userRoutes = require("./routes/user")
+
 const app = express();
 const PORT = 3001;
 
@@ -16,10 +22,12 @@ app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 
-app.use("/url", urlRoutes);
-app.use("/"	, stacticRoute);
+app.use("/url", restrictToLoggedinUserOnly, urlRoutes);
+app.use("/user", userRoutes);
+app.use("/"	, cheackAuth, stacticRoute);
 
 app.get("/url/:shortId", async (req, res) => {
     const shortId = req.params.shortId;
