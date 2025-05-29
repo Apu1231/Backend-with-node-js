@@ -1,10 +1,11 @@
 const  { getUser }= require("../service/auth")
 
 async function restrictToLoggedinUserOnly(req, res, next){
-    const userId  = req.cookies?.uid;
+    const userId  = req.headers["Authorization"];
     if(!userId) res.redirect("/login", );
-    
-    const user = getUser(userId);
+
+    const token = userId.split("Bearer ")[1];
+    const user = getUser(token);
     if(!user) return res.redirect("/login");
     
     req.user = user;
@@ -13,10 +14,11 @@ async function restrictToLoggedinUserOnly(req, res, next){
 
 
 async function cheackAuth (req, res, next) {
-       const userId  = req.cookies?.uid;
+      const userId  = req.headers["authorization"];
+       const token = userId.split("Bearer ")[1];
    
     
-    const user = getUser(userId);
+    const user = getUser(token);
     
     
     req.user = user;
